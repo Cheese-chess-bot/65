@@ -10,12 +10,9 @@ os.environ["OMP_NUM_THREADS"] = "2"
 os.environ["MKL_NUM_THREADS"] = "2"
 torch.set_num_threads(2)
 
-# Enforce local cache routing paths inside the container
-os.environ["HF_HOME"] = "/app/.cache/huggingface"
-
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
-MODEL_DIR = "Qwen/Qwen2.5-0.5B-Instruct"
+MODEL_DIR = "/app/model"
 
 def execute_sandboxed_code(code_str: str) -> str:
     """Safely runs generated python math/code blocks locally and returns stdout."""
@@ -38,9 +35,11 @@ def main():
 
     print("[INIT] Loading local engine weights from container cache layer...")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, local_files_only=True)
+    
+    # Using bfloat16 for optimal CPU processing footprint without crashing
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_DIR, 
-        torch_dtype=torch.float32, 
+        torch_dtype=torch.bfloat16, 
         device_map="cpu", 
         local_files_only=True
     )
