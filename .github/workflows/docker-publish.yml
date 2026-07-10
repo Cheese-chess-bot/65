@@ -5,7 +5,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # We hardcode your username in lowercase here to fix the tag error
+  IMAGE_NAME: cheese-chess-bot/rtq-smart-router
 
 jobs:
   build:
@@ -18,7 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Uses official Docker action setup instead
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
