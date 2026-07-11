@@ -18,10 +18,10 @@ RUN pip install --upgrade pip && \
     pip install huggingface_hub && \
     pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
-# Ensure model directory exists and fetch the exact 1.5B GGUF file reliably
+# Ensure model directory exists and fetch the exact Gemma 2B GGUF file reliably
 RUN mkdir -p /app/model && \
     python -c "from huggingface_hub import hf_hub_download; \
-    hf_hub_download(repo_id='Qwen/Qwen2.5-1.5B-Instruct-GGUF', filename='qwen2.5-1.5b-instruct-q4_k_m.gguf', local_dir='/app/model')"
+    hf_hub_download(repo_id='Bartowski/gemma-2-2b-it-GGUF', filename='gemma-2-2b-it-Q4_K_M.gguf', local_dir='/app/model')"
 
 # Copy the pipeline script over
 COPY pipeline.py /app/pipeline.py
