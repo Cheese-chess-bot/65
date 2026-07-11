@@ -7,20 +7,20 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install system dependencies
+# Install lightweight system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python requirements cleanly
+# Install python requirements with the fast pre-compiled llama-cpp wheel
 RUN pip install --upgrade pip && \
-    pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu && \
-    pip install transformers accelerate huggingface_hub
+    pip install huggingface_hub && \
+    pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
 
-# Safely pre-download the parameters directly into /app/model
-RUN python -c "from huggingface_hub import snapshot_download; \
-snapshot_download(repo_id='Qwen/Qwen2.5-0.5B-Instruct', local_dir='/app/model', ignore_patterns=['*.bin', '*.pt'])"
+# Ensure model directory exists and fetch the exact 1.5B GGUF file
+RUN mkdir -p /app/model && \
+    huggingface-cli download Qwen/Qwen2.5-1.5B-Instruct-GGUF qwen2.5-1.5b-instruct-q4_k_m.gguf --local-dir /app/model --local-dir-use-symlinks False
 
 # Copy the pipeline script over
 COPY pipeline.py /app/pipeline.py
