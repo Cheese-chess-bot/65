@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install lightweight system dependencies, Python 3, and build tools
+# Install lightweight system dependencies, Python 3, and core build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -18,25 +18,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a symlink so "python" calls "python3" automatically
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# Create a permanent system symlink so "python" invokes "python3" smoothly
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Upgrade pip and install requirements with the fast pre-compiled llama-cpp wheel
-RUN pip install --upgrade pip --break-system-packages && \
-    pip install huggingface_hub --break-system-packages && \
-    pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu --break-system-packages
+# Upgrade pip3 and install requirements with the fast pre-compiled llama-cpp wheel.
+# Using pip3 prevents command parsing conflicts introduced by minimal base images.
+RUN pip3 install --upgrade pip --break-system-packages && \
+    pip3 install huggingface_hub --break-system-packages && \
+    pip3 install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu --break-system-packages
 
-# Ensure model directory exists and fetch the faster 3-bit K-quant Gemma file reliably
+# Provision model path and fetch the lightweight 3-bit K-quant Gemma file securely
 RUN mkdir -p /app/model && \
     python -c "from huggingface_hub import hf_hub_download; \
     hf_hub_download(repo_id='Bartowski/gemma-2-2b-it-GGUF', filename='gemma-2-2b-it-Q3_K_L.gguf', local_dir='/app/model')"
 
-# Copy the pipeline script over
+# Copy the execution layer over
 COPY pipeline.py /app/pipeline.py
 
-# Force permissions so the script is universally readable and executable
+# Force full execution permissions across evaluation runtime files
 RUN chmod +x /app/pipeline.py
 
-# Double-layer entrypoint structure to prevent runtime launching parsing bugs
+# Double-layer entrypoint structure to eliminate runtime shell escaping bugs
 ENTRYPOINT ["python"]
 CMD ["/app/pipeline.py"]
