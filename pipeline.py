@@ -44,8 +44,7 @@ def main():
         model_path=MODEL_PATH,
         n_ctx=900, 
         n_threads=2, # Pinned perfectly to align with the 2 vCPU environment layout
-        n_batch=32,
-        type_k=2,    # Quantize Key cache cells to drop RAM usage    
+        n_batch=32,   
         verbose=False
     )
 
