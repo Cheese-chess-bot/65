@@ -1,15 +1,17 @@
 FROM node:24-slim
 
 # Force completely isolated system configurations for Python and Node
+# Added LLAMA_ARG_SWA_FULL=1 to bypass aggressive SWA KV cache compression
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    NODE_ENV=production
+    NODE_ENV=production \
+    GGML_NO_ACCELERATE=1 \
+    LLAMA_ARG_SWA_FULL=1
 
 WORKDIR /app
 
 # Install lightweight system dependencies, Python 3, and core build tools
-# Added python3-venv to guarantee pip3 binary availability in minimal slim distros
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -21,13 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Use the robust update-alternatives system instead of manual symlinking
-# This prevents path collision bugs on modern minimal Debian base layers
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# Upgrade pip3 and install requirements with the fast pre-compiled llama-cpp wheel.
+# Upgrade pip and install huggingface_hub first
 RUN pip3 install --upgrade pip --break-system-packages && \
-    pip3 install huggingface_hub --break-system-packages && \
-    pip3 install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu --break-system-packages
+    pip3 install huggingface_hub --break-system-packages
+
+# Build llama-cpp-python directly from source
+RUN pip3 install llama-cpp-python --no-binary llama-cpp-python --break-system-packages
 
 # Provision model path and fetch the lightweight 3-bit K-quant Gemma file securely
 RUN mkdir -p /app/model && \
