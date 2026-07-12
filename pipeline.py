@@ -5,8 +5,8 @@ from llama_cpp import Llama
 
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
-# Updated path matching your new Gemma 2B model configuration
-MODEL_PATH = "/app/model/gemma-2-2b-it-Q4_K_M.gguf"
+# Updated path to leverage the faster, lightweight 3-bit K-quant model file
+MODEL_PATH = "/app/model/gemma-2-2b-it-Q3_K_L.gguf"
 
 def main():
     if not os.path.exists(INPUT_PATH):
@@ -18,13 +18,13 @@ def main():
 
     print("[INIT] Allocating Llama-CPP context footprint...")
     
-    # Gemma-2 uses an updated attention mechanism; keeping n_batch at 256 stabilizes
-    # peak RAM usage to ensure your 4GB limits aren't crossed during quick evaluations.
+    # n_batch lowered to 128 to optimize processing pipelines on exactly 2 vCPUs.
+    # This prevents the restricted CPU lanes from bottlenecking during prompt ingestion.
     llm = Llama(
         model_path=MODEL_PATH,
         n_ctx=1024,
         n_threads=2, 
-        n_batch=256,
+        n_batch=128,
         verbose=False
     )
 
@@ -33,7 +33,7 @@ def main():
 
     for task in tasks:
         task_id = task["task_id"]
-        prompt = task["prompt"]                                                                                
+        prompt = task["prompt"]                                                                                                                
         prompt_lower = prompt.lower()
 
         # Target classification parameters
