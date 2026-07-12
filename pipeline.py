@@ -45,8 +45,7 @@ def main():
         n_ctx=900, 
         n_threads=2, # Pinned perfectly to align with the 2 vCPU environment layout
         n_batch=32,
-        type_k=2,    # Quantize Key cache cells to drop RAM usage
-        type_v=2,    # Quantize Value cache cells to drop RAM usage
+        type_k=2,    # Quantize Key cache cells to drop RAM usage    
         verbose=False
     )
 
