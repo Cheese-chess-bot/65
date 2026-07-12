@@ -11,8 +11,8 @@ MODEL_PATH = "/app/model/gemma-2-2b-it-Q3_K_L.gguf"
 MATH_GRAMMAR = """
 root   ::= object
 object ::= "{\\n" space "\\"thought\\":\\"" text "\\",\\n" space "\\"expression\\":\\"" expr "\\"\\n}"
-expr   ::= [0-9.+\\-*/() ]+
-text   ::= [a-zA-Z0-9 .,!?()_\\-]+
+expr   ::= [0-9.+*/() -]+
+text   ::= [a-zA-Z0-9 .,!?()_ -]+
 space  ::= "  "
 """
 
