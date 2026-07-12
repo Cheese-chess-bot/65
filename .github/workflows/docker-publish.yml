@@ -17,7 +17,7 @@ jobs:
     steps:
       # Upgraded to v4 (Fully compliant with modern node runners)
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Upgraded to v4 to fully support native Node 24 routing
       - name: Set up Docker Buildx
