@@ -45,9 +45,8 @@ def main():
         # Exact guardrails to ensure Gemma clears the strict evaluation rules
         if is_math:
             system_prompt = (
-                "You are an expert mathematical engine. Solve the math riddle precisely. "
-                "For calculations involving cookies, remember to divide by the base batch size (12) "
-                "before multiplying out to find the target proportion. Provide your final numerical step clean."
+                "Act as a token-optimized answering engine. Output only the exact, raw answer requested. Completely omit all explanations, meta-chat, pleasantries, markdown labels, and introductory or concluding remarks. Delivering anything beyond the direct data or core text violates efficiency constraints. "
+                "Use as minnimum tokens as possible. "
             )
         elif is_sentiment:
             system_prompt = (
@@ -79,11 +78,14 @@ def main():
             f"<start_of_turn>model\n"
         )
 
+        stop_tokens = ["<end_of_turn>", "<eos>", "\n", " "] if is_math else ["<end_of_turn>", "<eos>", "\n\n\n"]
+        
         # max_tokens=250 provides clear breathing room for multi-bullet outputs
         output = llm(
             formatted_prompt,
-            max_tokens=250,
-            stop=["<end_of_turn>", "<eos>", "\n\n\n\n"],
+            max_tokens=20 if is_math else 180,
+            temperature=0.0 if is_math else 0.1,
+            stop=stop_tokens,
             echo=False
         )
 
