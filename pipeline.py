@@ -135,7 +135,7 @@ def main():
             temperature=temp,
             stop=stop_tokens,
             echo=False,
-            cache_prompt=True,
+            prompt_cache=True,
             grammar=grammar_argument
         )
 
