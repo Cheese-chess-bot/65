@@ -79,11 +79,20 @@ def main():
         )
 
         stop_tokens = ["<end_of_turn>", "<eos>", "\n", " "] if is_math else ["<end_of_turn>", "<eos>", "\n\n\n"]
-        
+
+        #Token Setup
+
+        if is_math:
+            max_tk = 20
+        elif is_sentiment:
+            max_tk = 45   # Safe floor for a 2-sided sentence
+        else:
+            max_tk = 180
+            
         # max_tokens=250 provides clear breathing room for multi-bullet outputs
         output = llm(
             formatted_prompt,
-            max_tokens=20 if is_math else 180,
+            max_tokens=max_tk,
             temperature=0.0 if is_math else 0.1,
             stop=stop_tokens,
             echo=False
