@@ -29,7 +29,12 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 RUN pip3 install --upgrade pip --break-system-packages && \
     pip3 install huggingface_hub --break-system-packages
 
-# Build llama-cpp-python directly from source
+# FIXED: Added optimization flags for native compilation target to make 8-bit cache quantization 
+# arithmetic faster on standard x86/ARM grading CPUs without blowing up the 4GB footprint.
+ENV CFLAGS="-O3 -march=native"
+ENV CXXFLAGS="-O3 -march=native"
+
+# Build llama-cpp-python directly from source with optimized CFLAGS
 RUN pip3 install llama-cpp-python --no-binary llama-cpp-python --break-system-packages
 
 # Provision model path and fetch the lightweight 3-bit K-quant Gemma file securely
