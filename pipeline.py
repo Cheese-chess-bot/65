@@ -46,14 +46,22 @@ def main():
         temp = 0.1
 
         if is_math:
+            # FIXED: Few-shot context tells Gemma exactly how to respond without formatting or math trail leaks
             system_prompt = (
-                "You are an exact calculator. First, calculate the math steps internally. "
-                "Then, output ONLY the final raw numerical answer string or values requested. "
-                "Completely omit all explanations, thought text, meta-chat, and pleasantries."
+                "You are an exact numerical calculator. Solve the problem step-by-step internally, "
+                "but your final output must ONLY contain the raw numbers or values requested. "
+                "Completely omit all equations, thought scratchpads, variables, and explanations.\n\n"
+                "Example 1:\n"
+                "Task: A store has 100 apples. It sells 20%. It gets 50 more. How many remain?\n"
+                "Output: 130\n\n"
+                "Example 2:\n"
+                "Task: A recipe needs 2 cups of flour for 10 pancakes. How much for 25 pancakes? If flour costs $1 per cup, what is the cost?\n"
+                "Output: 5 cups, $5.00 total cost\n\n"
+                "Follow this exact numerical output behavior pattern for the task below."
             )
-            max_tk = 45  # Increased slightly to give Gemma space for multi-part answers (like T02b)
-            temp = 0.0   # Keep deterministic
-            stop_tokens = ["<end_of_turn>", "<eos>", "\n\n"]
+            max_tk = 30  
+            temp = 0.0   
+            stop_tokens = ["<end_of_turn>", "<eos>", "\n"]
             
         elif is_sentiment:
             system_prompt = (
@@ -108,7 +116,6 @@ def main():
         
         # Clean up any rare trailing text loops
         if "Here is" in answer or "Here are" in answer:
-            # Emergency trim if it manages to slip past the system prompt
             lines = answer.split('\n')
             cleaned_lines = [line for line in lines if not (line.lower().startswith("here is") or line.lower().startswith("here are"))]
             answer = '\n'.join(cleaned_lines).strip()
