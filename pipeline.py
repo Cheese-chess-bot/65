@@ -44,7 +44,7 @@ def main():
         model_path=MODEL_PATH,
         n_ctx=900, 
         n_threads=2, # Pinned perfectly to align with the 2 vCPU environment layout
-        n_batch=32,   
+        n_batch=50,   
         verbose=False
     )
 
@@ -96,7 +96,7 @@ def main():
             max_tk = 65
             
         elif is_summary:
-            if "bullet" in prompt_lower:
+            if any(keyword in prompt_lower for keyword in ["bullet", "point"]):
                 system_prompt = (
                     "Summarize the text. You must output EXACTLY THREE raw markdown bullet points starting directly with '*'. "
                     "Do not provide introductory text, greeting headers, or concluding remarks. "
