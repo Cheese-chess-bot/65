@@ -40,7 +40,8 @@ RUN pip3 install llama-cpp-python --no-binary llama-cpp-python --break-system-pa
 # Provision model path and fetch the lightweight 3-bit K-quant Gemma file securely
 RUN mkdir -p /app/model && \
     python -c "from huggingface_hub import hf_hub_download; \
-    hf_hub_download(repo_id='Bartowski/gemma-2-2b-it-GGUF', filename='gemma-2-2b-it-Q3_K_L.gguf', local_dir='/app/model')"
+hf_hub_download(repo_id='Qwen/Qwen2.5-1.5B-Instruct-GGUF', filename='Qwen2.5-1.5B-Instruct-Q4_K_M.gguf', local_dir='/app/model')
+
 
 # Copy the execution layer over
 COPY pipeline.py /app/pipeline.py
