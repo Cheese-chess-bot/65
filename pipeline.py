@@ -6,8 +6,7 @@ from llama_cpp import Llama, LlamaGrammar
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
 # SWAPPED: Target model pointed directly to the highly precise Llama 3.2 1B engine
-MODEL_PATH = "/app/model/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
-
+MODEL_PATH = "/app/model/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 # Strict GBNF Grammar to force structured JSON outputs on math paths
 MATH_GRAMMAR = """
 root   ::= object
