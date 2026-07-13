@@ -5,7 +5,8 @@ from llama_cpp import Llama, LlamaGrammar
 
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
-MODEL_PATH = "/app/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
+# SWAPPED: Target model pointed directly to the highly precise Llama 3.2 1B engine
+MODEL_PATH = "/app/model/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
 
 # Strict GBNF Grammar to force structured JSON outputs on math paths
 MATH_GRAMMAR = """
@@ -37,13 +38,11 @@ def main():
 
     print("[INIT] Allocating maximized 900-token footprint for strict 4GB limits...")
     
-    # FIXED: Scaled up safely to 900 tokens to increase text input processing space.
-    # Added type_k and type_v quantization parameters to force 8-bit KV cache structures,
-    # cutting cache overhead down significantly and maintaining an absolute safety buffer for Python JSON memory spikes.
+    # Initialized cleanly for the 2 vCPU runtime layout using Llama 3.2
     llm = Llama(
         model_path=MODEL_PATH,
         n_ctx=900, 
-        n_threads=2, # Pinned perfectly to align with the 2 vCPU environment layout
+        n_threads=2, 
         n_batch=50,   
         verbose=False
     )
@@ -53,7 +52,7 @@ def main():
 
     for task in tasks:
         task_id = task["task_id"]
-        prompt = task["prompt"]                                                                                                                                                                                                                                
+        prompt = task["prompt"]                                                                                                                                                                                                                                                                                                                                                                    
         prompt_lower = prompt.lower()
 
         is_math = any(re.search(rf"\b{word}\b", prompt_lower) for word in ["calculate", "total cost", "units remain", "how many units", "equation"])
@@ -68,7 +67,8 @@ def main():
             is_ner = "extract" in prompt_lower or "entities" in prompt_lower
 
         max_tk = 150
-        stop_tokens = ["<|im_end|>"]
+        # SWAPPED: Updated to match Llama-3.2's native End-Of-Turn token flags
+        stop_tokens = ["<|eot_id|>", "<|end_of_text|>"]
         temp = 0.1
         grammar_argument = None  
 
@@ -123,11 +123,11 @@ def main():
         else:
             system_prompt = "Provide a direct, short answer with zero introductory fluff."
 
-       # Update your formatted_prompt structure in main.py:
+        # SWAPPED: Converted prompt format sequence into strict Llama-3 instruction block layouts
         formatted_prompt = (
-            f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\n{prompt}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
+            f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_prompt}<|eot_id|>"
+            f"<|start_header_id|>user<|end_header_id|>\n{prompt}<|eot_id|>"
+            f"<|start_header_id|>assistant<|end_header_id|>\n"
         )
 
         output = llm(
