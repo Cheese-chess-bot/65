@@ -5,7 +5,7 @@ from llama_cpp import Llama, LlamaGrammar
 
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
-MODEL_PATH = "/app/model/gemma-2-2b-it-Q3_K_L.gguf"
+MODEL_PATH = "/app/model/qwen2.5-1.5b-instruct-q4_k_m.gguf"
 
 # Strict GBNF Grammar to force structured JSON outputs on math paths
 MATH_GRAMMAR = """
@@ -68,7 +68,7 @@ def main():
             is_ner = "extract" in prompt_lower or "entities" in prompt_lower
 
         max_tk = 150
-        stop_tokens = ["<end_of_turn>", "<eos>"]
+        stop_tokens = ["<|im_end|>"]
         temp = 0.1
         grammar_argument = None  
 
@@ -123,9 +123,11 @@ def main():
         else:
             system_prompt = "Provide a direct, short answer with zero introductory fluff."
 
+       # Update your formatted_prompt structure in main.py:
         formatted_prompt = (
-            f"<start_of_turn>user\n{system_prompt}\n\nTask: {prompt}<end_of_turn>\n"
-            f"<start_of_turn>model\n"
+            f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n{prompt}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
         )
 
         output = llm(
