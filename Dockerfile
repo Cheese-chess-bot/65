@@ -37,9 +37,9 @@ ENV CXXFLAGS="-O3 -march=native"
 # Build llama-cpp-python directly from source with optimized CFLAGS
 RUN pip3 install llama-cpp-python --no-binary llama-cpp-python --break-system-packages
 
-# FIXED: Corrected Python inline string closing syntax and updated filename to proper lowercase
+# SWAPPED: Updated to pull Llama-3.2-1B-Instruct to match the pipeline script configuration
 RUN mkdir -p /app/model && \
-    python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='Qwen/Qwen2.5-1.5B-Instruct-GGUF', filename='qwen2.5-1.5b-instruct-q4_k_m.gguf', local_dir='/app/model')"
+    python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='unsloth/Llama-3.2-1B-Instruct-GGUF', filename='Llama-3.2-1B-Instruct-Q4_K_M.gguf', local_dir='/app/model')"
 
 # Copy the execution layer over
 COPY pipeline.py /app/pipeline.py
