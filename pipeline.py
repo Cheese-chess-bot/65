@@ -5,8 +5,9 @@ from llama_cpp import Llama, LlamaGrammar
 
 INPUT_PATH = "/input/tasks.json"
 OUTPUT_PATH = "/output/results.json"
-# SWAPPED: Target model pointed directly to the highly precise Llama 3.2 1B engine
+# UPDATED: Target model pointed to the 3B parameter variant
 MODEL_PATH = "/app/model/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+
 # Strict GBNF Grammar to force structured JSON outputs on math paths
 MATH_GRAMMAR = """
 root   ::= object
@@ -35,14 +36,13 @@ def main():
     with open(INPUT_PATH, "r") as f:
         tasks = json.load(f)
 
-    print("[INIT] Allocating maximized 900-token footprint for strict 4GB limits...")
-    
-    # Initialized cleanly for the 2 vCPU runtime layout using Llama 3.2
+    # UPDATED: Tightened context footprint to 768 to prevent RAM wait cycles on CPU
+    print("[INIT] Allocating optimized 768-token footprint for 3B CPU performance...")
     llm = Llama(
         model_path=MODEL_PATH,
-        n_ctx=900, 
+        n_ctx=768, 
         n_threads=2, 
-        n_batch=50,   
+        n_batch=32,   
         verbose=False
     )
 
@@ -66,7 +66,6 @@ def main():
             is_ner = "extract" in prompt_lower or "entities" in prompt_lower
 
         max_tk = 150
-        # SWAPPED: Updated to match Llama-3.2's native End-Of-Turn token flags
         stop_tokens = ["<|eot_id|>", "<|end_of_text|>"]
         temp = 0.1
         grammar_argument = None  
@@ -122,7 +121,6 @@ def main():
         else:
             system_prompt = "Provide a direct, short answer with zero introductory fluff."
 
-        # SWAPPED: Converted prompt format sequence into strict Llama-3 instruction block layouts
         formatted_prompt = (
             f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_prompt}<|eot_id|>"
             f"<|start_header_id|>user<|end_header_id|>\n{prompt}<|eot_id|>"
